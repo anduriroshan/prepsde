@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>PrepSDE — SDE2 Interview Prep Tracker</title>
+  <meta name="description" content="6-month SDE2 interview preparation tracker with daily tasks, streak tracking, AI coaching, and reflections.">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PrepSDE">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+  <!-- PWA Install Banner -->
+  <div class="install-banner" id="install-banner" style="display:none;">
+    <span>📱 Install this app on your phone for offline access!</span>
+    <button class="btn btn-primary btn-sm" id="btn-install">Install</button>
+    <button class="install-dismiss" id="btn-dismiss-install">&times;</button>
+  </div>
+
+  <!-- Sidebar Navigation (Desktop) -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🎯</span>
+      <span class="logo-text">PrepSDE</span>
+    </div>
+
+    <ul class="nav-links">
+      <li>
+        <button class="nav-btn active" data-view="dashboard" id="nav-dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-view="dsa" id="nav-dsa">
+          <span class="nav-icon">💻</span>
+          <span class="nav-label">DSA Tracker</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-view="reflections" id="nav-reflections">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Reflections</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-view="progress" id="nav-progress">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label">Progress</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-btn" data-view="settings" id="nav-settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Settings</span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-streak">
+      <div class="streak-fire" id="streak-fire">🔥</div>
+      <div class="streak-count" id="streak-sidebar-count">0</div>
+      <div class="streak-label">day streak</div>
+    </div>
+  </nav>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav" id="mobile-nav">
+    <button class="mobile-nav-btn active" data-view="dashboard">
+      <span class="mobile-nav-icon">📊</span>
+      <span class="mobile-nav-label">Home</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="dsa">
+      <span class="mobile-nav-icon">💻</span>
+      <span class="mobile-nav-label">DSA</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="reflections">
+      <span class="mobile-nav-icon">📝</span>
+      <span class="mobile-nav-label">Journal</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="progress">
+      <span class="mobile-nav-icon">📈</span>
+      <span class="mobile-nav-label">Progress</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="settings">
+      <span class="mobile-nav-icon">⚙️</span>
+      <span class="mobile-nav-label">Settings</span>
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content" id="main-content">
+
+    <!-- ===== DASHBOARD VIEW ===== -->
+    <section class="view active" id="view-dashboard">
+      <header class="view-header">
+        <div>
+          <h1 id="greeting">Good evening, Roshan</h1>
+          <p class="view-subtitle" id="date-display"></p>
+        </div>
+        <div class="header-actions desktop-only">
+          <button class="btn btn-outline" id="btn-send-email" title="Send today's tasks to your email">
+            ✉️ Email Today's Plan
+          </button>
+        </div>
+      </header>
+
+      <!-- Phase & Week Indicator -->
+      <div class="phase-banner" id="phase-banner">
+        <div class="phase-info">
+          <span class="phase-badge" id="phase-badge">Phase 1</span>
+          <span class="phase-name" id="phase-name">Foundation Reset</span>
+        </div>
+        <div class="week-info">
+          <span class="week-number" id="week-number">Week 1</span>
+          <span class="week-of">of 24</span>
+        </div>
+        <div class="phase-progress-bar">
+          <div class="phase-progress-fill" id="phase-progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-value" id="stat-streak">0</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value" id="stat-problems">0</div>
+          <div class="stat-label">Problems Solved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🧠</div>
+          <div class="stat-value" id="stat-reviews-due">0</div>
+          <div class="stat-label">Reviews Due</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value" id="stat-days-left">180</div>
+          <div class="stat-label">Days Left</div>
+        </div>
+      </div>
+
+      <!-- Today's Tasks -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2>Today's Tasks</h2>
+          <span class="task-count" id="task-completion">0/0</span>
+        </div>
+        <div class="tasks-container" id="tasks-container"></div>
+      </div>
+
+      <!-- Quick Reflection -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2>End of Day Reflection</h2>
+          <span class="reflection-status" id="reflection-status">Not done yet</span>
+        </div>
+        <div class="quick-reflection" id="quick-reflection-form">
+          <div class="reflection-question">
+            <label for="reflection-accomplished">What did you accomplish today?</label>
+            <textarea id="reflection-accomplished" placeholder="I solved 2 LeetCode problems on sliding window..." rows="3"></textarea>
+          </div>
+          <div class="reflection-question">
+            <label for="reflection-struggle">What was hardest? Where did you struggle?</label>
+            <textarea id="reflection-struggle" placeholder="DP problems still feel impossible..." rows="3"></textarea>
+          </div>
+          <div class="reflection-question">
+            <label for="reflection-tomorrow">One focus for tomorrow:</label>
+            <textarea id="reflection-tomorrow" placeholder="Finish the binary search section..." rows="2"></textarea>
+          </div>
+          <div class="reflection-rating">
+            <label>How productive were you today?</label>
+            <div class="rating-stars" id="rating-stars">
+              <button class="star" data-rating="1">★</button>
+              <button class="star" data-rating="2">★</button>
+              <button class="star" data-rating="3">★</button>
+              <button class="star" data-rating="4">★</button>
+              <button class="star" data-rating="5">★</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="btn-save-reflection">Save Reflection & Mark Day Complete</button>
+        </div>
+      </div>
+
+      <!-- AI Coach Feedback (appears after saving reflection) -->
+      <div class="section-card ai-coach-card" id="ai-coach-card" style="display:none;">
+        <div class="section-header">
+          <h2><span class="ai-sparkle">✨</span> AI Coach</h2>
+          <span class="ai-model-badge">Gemini Flash Lite</span>
+        </div>
+        <div class="ai-feedback-content" id="ai-feedback-content">
+          <!-- Filled by JS after reflection analysis -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DSA TRACKER VIEW ===== -->
+    <section class="view" id="view-dsa">
+      <header class="view-header">
+        <div>
+          <h1>DSA Problem Tracker</h1>
+          <p class="view-subtitle">Track problems & spaced repetition (3-7-15 rule)</p>
+        </div>
+        <button class="btn btn-primary" id="btn-add-problem">+ Add Problem</button>
+      </header>
+
+      <!-- Review Due Today -->
+      <div class="section-card review-alert" id="review-alert" style="display:none;">
+        <div class="section-header">
+          <h2>⏰ Reviews Due Today</h2>
+        </div>
+        <div id="review-due-list"></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="review">Needs Review</button>
+        <button class="filter-btn" data-filter="arrays">Arrays</button>
+        <button class="filter-btn" data-filter="trees">Trees</button>
+        <button class="filter-btn" data-filter="graphs">Graphs</button>
+        <button class="filter-btn" data-filter="dp">DP</button>
+        <button class="filter-btn" data-filter="strings">Strings</button>
+      </div>
+
+      <!-- Problems Table -->
+      <div class="section-card">
+        <div class="problems-table" id="problems-table">
+          <div class="table-header">
+            <span class="col-name">Problem</span>
+            <span class="col-diff">Difficulty</span>
+            <span class="col-pattern">Pattern</span>
+            <span class="col-date">Solved</span>
+            <span class="col-review">Next Review</span>
+            <span class="col-actions">Actions</span>
+          </div>
+          <div id="problems-list"></div>
+        </div>
+        <div class="empty-state" id="empty-problems">
+          <span class="empty-icon">💻</span>
+          <p>No problems logged yet. Start solving!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REFLECTIONS VIEW ===== -->
+    <section class="view" id="view-reflections">
+      <header class="view-header">
+        <div>
+          <h1>Reflection Journal</h1>
+          <p class="view-subtitle">Your daily progress log</p>
+        </div>
+      </header>
+
+      <div class="reflections-timeline" id="reflections-timeline">
+        <div class="empty-state" id="empty-reflections">
+          <span class="empty-icon">📝</span>
+          <p>No reflections yet. Complete your first day!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PROGRESS VIEW ===== -->
+    <section class="view" id="view-progress">
+      <header class="view-header">
+        <div>
+          <h1>Progress Overview</h1>
+          <p class="view-subtitle">Your 6-month journey visualized</p>
+        </div>
+      </header>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h2>NeetCode 150 Progress</h2>
+          <span class="progress-fraction" id="neetcode-fraction">0/150</span>
+        </div>
+        <div class="big-progress-bar">
+          <div class="big-progress-fill" id="neetcode-progress"></div>
+        </div>
+        <div class="pattern-grid" id="pattern-grid"></div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h2>Activity Calendar</h2>
+        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+        <div class="calendar-legend">
+          <span class="legend-item"><span class="legend-box level-0"></span>No activity</span>
+          <span class="legend-item"><span class="legend-box level-1"></span>Light</span>
+          <span class="legend-item"><span class="legend-box level-2"></span>Moderate</span>
+          <span class="legend-item"><span class="legend-box level-3"></span>Heavy</span>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h2>Phase Breakdown</h2>
+        </div>
+        <div class="phases-breakdown" id="phases-breakdown"></div>
+      </div>
+    </section>
+
+    <!-- ===== SETTINGS VIEW ===== -->
+    <section class="view" id="view-settings">
+      <header class="view-header">
+        <div>
+          <h1>Settings</h1>
+          <p class="view-subtitle">Configure your tracker</p>
+        </div>
+      </header>
+
+      <div class="settings-grid">
+        <!-- General Settings -->
+        <div class="section-card">
+          <h3>General</h3>
+          <div class="setting-row">
+            <label for="setting-name">Your Name</label>
+            <input type="text" id="setting-name" value="Roshan" placeholder="Your name">
+          </div>
+          <div class="setting-row">
+            <label for="setting-start-date">Prep Start Date</label>
+            <input type="date" id="setting-start-date" value="2026-06-16">
+          </div>
+          <div class="setting-row">
+            <label for="setting-end-date">Target End Date</label>
+            <input type="date" id="setting-end-date" value="2026-12-15">
+          </div>
+          <button class="btn btn-primary" id="btn-save-settings">Save Settings</button>
+        </div>
+
+        <!-- AI Coach Settings -->
+        <div class="section-card">
+          <h3>🤖 AI Coach (Gemini)</h3>
+          <p class="setting-desc">Add your Gemini API key to enable AI-powered reflection coaching. The coach analyzes your reflections and teaches you a micro-concept on lazy days.</p>
+          <div class="setting-row">
+            <label for="setting-gemini-key">Gemini API Key</label>
+            <input type="password" id="setting-gemini-key" placeholder="AIzaSy...">
+          </div>
+          <p class="setting-desc" style="margin-top:8px;">Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio →</a> (uses gemini-2.0-flash-lite — very cheap)</p>
+          <button class="btn btn-primary" id="btn-save-ai-settings">Save AI Settings</button>
+        </div>
+
+        <!-- Email Settings -->
+        <div class="section-card">
+          <h3>📧 Email Reminders</h3>
+          <p class="setting-desc">Set up EmailJS to receive daily task emails. <a href="https://www.emailjs.com/" target="_blank" rel="noopener">Sign up free →</a></p>
+          <div class="setting-row">
+            <label for="setting-email">Your Email</label>
+            <input type="email" id="setting-email" placeholder="roshananduri@gmail.com">
+          </div>
+          <div class="setting-row">
+            <label for="setting-emailjs-service">EmailJS Service ID</label>
+            <input type="text" id="setting-emailjs-service" placeholder="service_xxxxx">
+          </div>
+          <div class="setting-row">
+            <label for="setting-emailjs-template">EmailJS Template ID</label>
+            <input type="text" id="setting-emailjs-template" placeholder="template_xxxxx">
+          </div>
+          <div class="setting-row">
+            <label for="setting-emailjs-key">EmailJS Public Key</label>
+            <input type="text" id="setting-emailjs-key" placeholder="your_public_key">
+          </div>
+          <button class="btn btn-primary" id="btn-save-email-settings">Save Email Settings</button>
+          <button class="btn btn-outline" id="btn-test-email" style="margin-top:8px;">Send Test Email</button>
+        </div>
+
+        <!-- Data Management -->
+        <div class="section-card">
+          <h3>💾 Data Management</h3>
+          <p class="setting-desc">All data is stored in your browser. Export to back up or transfer between devices.</p>
+          <div class="setting-actions">
+            <button class="btn btn-outline" id="btn-export-data">Export Data (JSON)</button>
+            <label class="btn btn-outline" for="import-file-input">Import Data</label>
+            <input type="file" id="import-file-input" accept=".json" style="display:none;">
+            <button class="btn btn-danger" id="btn-clear-data">⚠️ Clear All Data</button>
+          </div>
+        </div>
+
+        <!-- EmailJS Setup Guide -->
+        <div class="section-card setup-guide">
+          <h3>📋 EmailJS Setup Guide</h3>
+          <ol>
+            <li>Go to <a href="https://www.emailjs.com/" target="_blank" rel="noopener">emailjs.com</a> and create a free account</li>
+            <li>Add an <strong>Email Service</strong> (connect your Gmail)</li>
+            <li>Create an <strong>Email Template</strong> with these variables:
+              <code class="template-code">
+Subject: 🎯 Day {{day_number}} — Your Interview Prep Tasks
+
+Hey {{to_name}},
+
+{{tasks_today}}
+
+Current Streak: {{streak_count}} days 🔥
+Phase: {{phase_name}} | Week {{week_number}}
+
+Stay consistent. You got this. 💪
+              </code>
+            </li>
+            <li>Copy your <strong>Service ID</strong>, <strong>Template ID</strong>, and <strong>Public Key</strong> into the fields above</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Add Problem Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="add-problem-modal">
+      <div class="modal-header">
+        <h2>Log a Problem</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label for="problem-name">Problem Name</label>
+          <input type="text" id="problem-name" placeholder="Two Sum">
+        </div>
+        <div class="form-row">
+          <label for="problem-link">LeetCode Link (optional)</label>
+          <input type="url" id="problem-link" placeholder="https://leetcode.com/problems/two-sum/">
+        </div>
+        <div class="form-row-group">
+          <div class="form-row">
+            <label for="problem-difficulty">Difficulty</label>
+            <select id="problem-difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="problem-pattern">Pattern</label>
+            <select id="problem-pattern">
+              <option value="arrays">Arrays & Hashing</option>
+              <option value="two-pointers">Two Pointers</option>
+              <option value="sliding-window">Sliding Window</option>
+              <option value="stack">Stack</option>
+              <option value="binary-search">Binary Search</option>
+              <option value="linked-list">Linked List</option>
+              <option value="trees">Trees</option>
+              <option value="tries">Tries</option>
+              <option value="heap">Heap / Priority Queue</option>
+              <option value="backtracking">Backtracking</option>
+              <option value="graphs">Graphs</option>
+              <option value="dp">Dynamic Programming</option>
+              <option value="greedy">Greedy</option>
+              <option value="intervals">Intervals</option>
+              <option value="math">Math & Geometry</option>
+              <option value="bit">Bit Manipulation</option>
+              <option value="strings">Strings</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Did you solve it independently?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="solved-independently" value="yes" checked> Yes</label>
+            <label class="radio-label"><input type="radio" name="solved-independently" value="partial"> Partially (needed hints)</label>
+            <label class="radio-label"><input type="radio" name="solved-independently" value="no"> No (watched solution)</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="problem-notes">Notes (approach, key insight)</label>
+          <textarea id="problem-notes" rows="3" placeholder="Used two-pointer approach. Key insight: sort first, then use pointers from both ends..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btn-cancel-problem">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-problem">Save Problem</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span class="toast-icon" id="toast-icon">✅</span>
+    <span class="toast-msg" id="toast-msg">Saved successfully!</span>
+  </div>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
+  </script>
+
+  <script src="app.js"></script>
+</body>
+</html>
