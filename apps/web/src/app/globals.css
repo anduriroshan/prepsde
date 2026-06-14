@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap');
+
+:root {
+  --accent: #638688;
+}
+
+body {
+  font-family: 'Roboto', system-ui, sans-serif;
+  background-color: #0d0d0d;
+  color: #f0f0f0;
+}

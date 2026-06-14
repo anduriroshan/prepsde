@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@prepsde/tokens": ["../../packages/tokens/src/index"],
+      "@prepsde/hooks": ["../../packages/hooks/src/index"]
+    }
+  }
+}
