@@ -33,11 +33,23 @@ All collections are top-level (not subcollections). Each document has a `userId`
 
 **Verdict values:** "deep_work" | "surface" | "lazy" (NOT "productive"/"mediocre" from old PWA)
 
+**weeklySnapshot document ID:** `{uid}_{weekId}` where weekId = ISO week format "YYYY-WNN" (e.g., "abc123_2026-W24"). Generated every Sunday by Cloud Scheduler POST /progress/weekly.
+
+**reflection document ID:** `{userId}_{date}` (e.g., "abc123xyz_2026-06-14"). Enforces one reflection per user per day at the DB layer. Idempotent create via `set(..., merge=True)`.
+
+**deadlineAdjustments idempotency:** Before writing, check `userId == uid AND computedAt >= todayStart`. If exists, skip — prevents double-writes when Cloud Scheduler fires twice.
+
+**pods collection (deferred, not MVP):** Top-level `pods/{podId}` with subcollection `pods/{podId}/members/{uid}`. `memberCount` is denormalized on the pod document. Member stats (thisWeekProblems, thisWeekStreak) are duplicated from user doc for read performance.
+
 **Composite indexes needed (must create in firestore.indexes.json):**
 - problems: userId ASC + nextReviewDate ASC
+- problems: userId ASC + pattern ASC + nextReviewDate ASC
 - problems: userId ASC + pattern ASC + mastered ASC
 - problems: userId ASC + mastered ASC + createdAt DESC
+- problems: userId ASC + difficulty ASC + nextReviewDate ASC
 - reflections: userId ASC + date DESC
 - reflections: userId ASC + submittedAt DESC
-- deadlineAdjustments: userId ASC + triggeredAt DESC
+- deadlineAdjustments: userId ASC + computedAt DESC
 - weeklySnapshots: userId ASC + weekStartDate DESC
+
+**Full design reference:** `C:\Users\anduri.roshan\Downloads\prepsde\knowledge\db_and_api_design.md` — complete schema rationale, access patterns, and endpoint contracts for every collection and route.

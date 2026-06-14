@@ -24,17 +24,20 @@ The PrepSDE backend is a stateless FastAPI service running on Cloud Run that act
                   │ HTTPS + Firebase ID Token   │ Firestore SDK (direct)
                   ▼                             ▼
 ┌──────────────────────────┐      ┌──────────────────────────────────┐
-│  Cloud Run               │      │  Firestore (Firebase free tier)  │
-│  FastAPI (Python 3.11)   │◄────►│  Collections:                    │
-│                          │      │    users, problems, reflections,  │
-│  Routers:                │      │    streaks, deadlineAdjustments,  │
-│  /problems               │      │    weeklySnapshots               │
-│  /reflections            │      └──────────────────────────────────┘
-│  /streaks                │
-│  /dashboard              │      ┌──────────────────────────────────┐
-│  /deadline               │      │  Firebase Authentication         │
-│  /ai/coach               │◄────►│  (Google one-tap)                │
-│  /progress               │      │  ID token verification via       │
+│  Cloud Run               │      │  Firestore (Firebase free tier)       │
+│  FastAPI (Python 3.11)   │◄────►│  Collections:                         │
+│                          │      │    users, problems, reflections,      │
+│  Routers:                │      │    streaks, deadlineAdjustments,      │
+│  /problems               │      │    weeklySnapshots,                   │
+│  /reflections            │      │    leetcodeIntegrations,              │
+│  /streaks                │      │    leetcodeBaseline,                  │
+│                          │      │    leetcodeVerifiedSolves/{uid}/solves│
+│                          │      └───────────────────────────────────────┘
+│  /dashboard              │
+│  /deadline               │      ┌──────────────────────────────────┐
+│  /ai/coach               │◄────►│  Firebase Authentication         │
+│  /progress               │      │  (Google one-tap)                │
+│  /integrations/leetcode  │      │  ID token verification via       │
 │  /health                 │      │  firebase-admin SDK              │
 │                          │      └──────────────────────────────────┘
 │  Middleware:             │
@@ -42,8 +45,27 @@ The PrepSDE backend is a stateless FastAPI service running on Cloud Run that act
 │  Request logging         │◄────►│  Vertex AI / Gemini              │
 │                          │      │  gemini-2.0-flash-lite           │
 └──────────────────────────┘      │  (server-side only, key in       │
-           ▲                      │  Secret Manager)                 │
-           │                      └──────────────────────────────────┘
+           ▲          │           │  Secret Manager)                 │
+           │          │           └──────────────────────────────────┘
+           │          │
+           │          │ HTTP GET (on-demand, 5-10s timeout)
+           │          ▼
+           │   ┌─────────────────────────────────────────────┐
+           │   │  alfa-leetcode-api (EXTERNAL, UNOFFICIAL)    │
+           │   │  https://alfa-leetcode-api.onrender.com      │
+           │   │  github.com/alfaarghya/alfa-leetcode-api      │
+           │   │                                              │
+           │   │  GET /{username}/acSubmission?limit=N        │
+           │   │  Returns: { submission: [{ titleSlug,        │
+           │   │    title, timestamp, statusDisplay, lang }] } │
+           │   │                                              │
+           │   │  GET /{username}/progress                    │
+           │   │  Returns: { numAcceptedQuestions: [...] }    │
+           │   │                                              │
+           │   │  NO SLA. Free tier (Render). Optional only.  │
+           │   │  App is fully functional without it.         │
+           │   └─────────────────────────────────────────────┘
+           │
            │ Authenticated HTTP POST
 ┌──────────────────────────┐
 │  Cloud Scheduler         │
@@ -316,7 +338,8 @@ apps/backend/
 │   ├── dashboard.py                # GET /dashboard — aggregated home screen data
 │   ├── deadline.py                 # GET /deadline, POST /deadline/evaluate (scheduler)
 │   ├── coach.py                    # POST /ai/coach
-│   └── progress.py                 # GET /progress, POST /progress/weekly (scheduler)
+│   ├── progress.py                 # GET /progress, POST /progress/weekly (scheduler)
+│   └── integrations.py             # POST /connect, POST /sync, GET, GET /verified-solves, DELETE
 │
 ├── middleware/
 │   ├── __init__.py
@@ -329,7 +352,8 @@ apps/backend/
 │   ├── reflections.py              # Firestore data access for reflections collection
 │   ├── streaks.py                  # Firestore data access for streaks collection
 │   ├── deadline_adjustments.py     # Firestore data access for deadlineAdjustments
-│   └── weekly_snapshots.py         # Firestore data access for weeklySnapshots
+│   ├── weekly_snapshots.py         # Firestore data access for weeklySnapshots
+│   └── leetcode_integrations.py    # Firestore data access for leetcodeIntegrations, leetcodeBaseline, leetcodeVerifiedSolves
 │
 ├── services/
 │   ├── __init__.py
@@ -337,7 +361,8 @@ apps/backend/
 │   ├── deadline_engine.py          # Pure math deadline adjustment algorithm
 │   ├── spaced_repetition.py        # 3-7-15 interval calculation logic
 │   ├── streak_service.py           # Streak update logic (timezone-aware)
-│   └── weekly_summary.py           # Weekly snapshot generation logic
+│   ├── weekly_summary.py           # Weekly snapshot generation logic
+│   └── leetcode_sync.py            # alfa-leetcode-api calls, slug diff algorithm, verified solve recording, gap message
 │
 ├── models/
 │   ├── __init__.py
@@ -346,7 +371,8 @@ apps/backend/
 │   ├── reflection.py               # ReflectionCreate, ReflectionResponse
 │   ├── deadline.py                 # DeadlineState, DeadlineAdjustment, DeadlineEvaluateResponse
 │   ├── coach.py                    # CoachRequest, CoachResponse, Verdict enum
-│   └── dashboard.py                # DashboardResponse (all bento card data)
+│   ├── dashboard.py                # DashboardResponse (all bento card data)
+│   └── integrations.py             # LeetCodeConnectRequest, LeetCodeIntegrationResponse, SyncResponse, VerifiedSolve
 │
 └── config.py                       # Settings loaded from env vars via pydantic-settings
 ```
@@ -1125,6 +1151,11 @@ Quick reference for all endpoints. All protected routes require `Authorization: 
 | POST | `/ai/coach` | Firebase | AI coach evaluation of a reflection (pre-screen + Gemini) |
 | POST | `/deadline/nightly` | Scheduler | Nightly deadline recalculation for all active users |
 | POST | `/progress/weekly` | Scheduler | Weekly snapshot generation for all active users |
+| POST | `/integrations/leetcode/connect` | Firebase | Connect LeetCode username; capture full baseline slug snapshot |
+| POST | `/integrations/leetcode/sync` | Firebase | Fetch new solves, diff against baseline + timestamp, record verified solves |
+| GET | `/integrations/leetcode` | Firebase | Get LeetCode integration status for Profile/Settings screen |
+| GET | `/integrations/leetcode/verified-solves` | Firebase | List LeetCode-verified new solves (supports `?unlogged=true` filter) |
+| DELETE | `/integrations/leetcode` | Firebase | Soft-disconnect LeetCode (preserves baseline and verified solves) |
 
 **Note on `/ai/coach` vs submission in `/reflections`:**
 The client calls `POST /reflections` to save the reflection data, and separately calls `POST /ai/coach` to get the AI evaluation. This decouples persistence from AI evaluation — if Gemini is slow or fails, the reflection is already saved. The coach endpoint returns the verdict and stores it back into the reflection document via `reflections/{id}` update. This is the cleaner design compared to bundling AI evaluation into the reflection create endpoint.
