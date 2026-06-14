@@ -1092,7 +1092,6 @@ service cloud.firestore {
 
 | Feature | Reason to Defer |
 |---|---|
-| **Accountability Pods** | Requires user-matching algorithm, group data model, privacy controls for shared reflections, and moderation. Independent feature — add after core loop is proven. |
 | **Weekly Summary Card generation** | Cloud Scheduler + Gemini call for summary writing. Can ship with manual/rule-based summaries first. |
 | **Phase Gate enforcement** | Requires defining exact gate criteria per role, building the check logic, and UI for blocked state. Defer until core tracking is working. |
 | **Recovery Plan (AI-generated 2-day plan)** | Requires a second Gemini call per deadline extension event. Defer until quota management is proven and you have usage data. |
@@ -1119,9 +1118,6 @@ Can a user submit multiple reflections in one day (e.g., a morning and an evenin
 
 **4. Gemini quota reset timezone**
 The daily Gemini quota resets "at midnight" — but midnight where? If it resets at midnight UTC, Indian users (UTC+5:30) hit a new quota at 5:30 AM IST, which means two Gemini calls could happen in what feels like the same "day" to the user (one at 11 PM, one at 12:30 AM). Recommend: reset at midnight IST (`Asia/Kolkata`), but this requires storing the user's timezone or hard-coding IST for the MVP. Decide before shipping.
-
-**5. Accountability Pod matching algorithm**
-features.md asks whether pods should be invite-only or matchmade. This affects the data model (pods collection, membership management, weekly leaderboard aggregation) and the matching logic (by target company? prep stage? start date proximity?). The backend implications are significant — pods require a separate collection, write operations on multiple user documents, and potentially a background job for matching. Decide scope before including in any sprint.
 
 ---
 

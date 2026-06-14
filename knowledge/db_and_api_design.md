@@ -17,8 +17,8 @@ Solving 150 LeetCode problems means nothing if you cannot recall the core insigh
 **3. "I'm lying to myself about how hard I'm working."**
 A user who writes "did some arrays, studied system design" in their daily reflection is not working at interview level. The AI reflection grader (BS detector) makes the self-deception visible. A "deep work" verdict requires specific problem names, pattern identifications, and real struggles. Lazy entries get called out. Without this, the streak is just a number with no signal.
 
-**4. "I have no accountability."**
-Solo prep has a high dropout rate. Accountability pods give users 3-4 peers they are mildly competing with on a weekly leaderboard. Knowing someone else will see your streak drop is a stronger motivator than any notification. Without the pod system, every slip is invisible.
+**4. "I have no visibility into whether I'm actually improving."**
+Solving problems without tracking mastery creates false confidence. The Progress screen's topic mastery bars, weekly summaries, and activity heatmap surface whether the user is actually making ground — not just staying busy. Without this, effort is invisible and patterns of avoidance go unnoticed.
 
 Every schema field and every API endpoint in this document exists to serve one of these four problems. When you are unsure whether a field is necessary, trace it back to this list. If it does not connect, do not add it.
 
@@ -387,67 +387,6 @@ ISO week numbers (`YYYY-WNN`) are unambiguous, globally standardized, and sort c
 |---|---|---|
 | Last 12 weeks for Progress screen | `userId == uid ORDER BY weekStartDate DESC LIMIT 12` | `userId ASC, weekStartDate DESC` |
 | Existence check before generation | `doc("abc123xyz_2026-W24").get()` | None (O(1) by document ID) |
-
----
-
-### 1.6 `pods/{podId}` and `pods/{podId}/members/{uid}`
-
-**The problem:** Accountability requires knowing who else is in your pod and how they are performing this week. Without the pod system, prep is entirely solitary and dropout rates are high. The leaderboard makes each user's effort visible to their peers.
-
-**Note:** Pods are explicitly deferred in `backend_architecture.md` Section 7. This schema defines the data model for when they are built, but the endpoints are not in scope for MVP. The Profile screen shows a hardcoded pod in the current UI.
-
-#### Schema — `pods/{podId}`
-
-```json
-{
-  "podId":       "pod_k9x2m1",
-  "name":        "DSA Grinders",
-  "createdAt":   "2026-06-10T09:00:00Z",
-  "matchCriteria": {
-    "targetRole":  "SDE2",
-    "prepStage":   1
-  },
-  "memberCount": 4
-}
-```
-
-#### Schema — `pods/{podId}/members/{uid}`
-
-```json
-{
-  "uid":              "abc123xyz",
-  "displayName":      "Roshan A.",
-  "photoURL":         "https://lh3.googleusercontent.com/...",
-  "thisWeekProblems": 11,
-  "thisWeekStreak":   6,
-  "lastUpdated":      "2026-06-14T20:00:00Z"
-}
-```
-
-#### Field-by-field rationale
-
-**Pod document:**
-
-| Field | Type | Why it exists |
-|---|---|---|
-| `podId` | string | Document ID, also stored as a field. |
-| `name` | string | Display name shown in Profile: `"DSA Grinders" · 4 members`. |
-| `matchCriteria` | map | The criteria used to match members. Stored for future use — if a pod needs to be rebuilt (member left), the matching algorithm can use this. |
-| `memberCount` | integer | **Denormalized.** Displayed alongside the pod name. Computing it by counting the members subcollection would cost 1 additional read per pod view. Stored here to keep the pod detail card to 1 read. |
-
-**Members subcollection:**
-
-| Field | Type | Why it exists |
-|---|---|---|
-| `uid` | string | Firebase UID. The document ID is also the uid. Stored as a field for queries. |
-| `displayName`, `photoURL` | strings | Duplicated from the user document. This is a read-performance trade-off: the pod leaderboard needs to show name and avatar for all 4 members. If this data lived only in `users/{uid}`, the pod view would require 4 additional reads (one per member). Duplication eliminates those reads. |
-| `thisWeekProblems` | integer | Problems solved this week. The leaderboard is ranked by this field. Updated by the weekly snapshot job (or on problem creation, if real-time leaderboard is wanted). |
-| `thisWeekStreak` | integer | Current streak. Second leaderboard metric after problems. |
-| `lastUpdated` | Timestamp | When the member's stats were last refreshed. Used to detect stale data. |
-
-#### Why pods is a top-level collection, not a subcollection of users
-
-A user belongs to one pod. A pod has multiple members. If pods were a subcollection of users (`users/{uid}/pods/{podId}`), you could not query "all members of pod X" without knowing every member's uid in advance. The top-level `pods/{podId}/members/{uid}` model lets the pod leaderboard page query `pods.doc(podId).collection("members").orderBy("thisWeekProblems", "desc")` in a single round-trip.
 
 ---
 

@@ -19,11 +19,10 @@ const PLAN_ROWS = [
 const NOTIFS = [
   { label: "Daily reminder", time: "9:00 PM" },
   { label: "Weekly summary", time: "Sunday"  },
-  { label: "Pod updates",    time: ""         },
 ];
 
 export default function ProfileScreen() {
-  const [notifStates, setNotifStates] = useState([true, true, true]);
+  const [notifStates, setNotifStates] = useState([true, true]);
 
   return (
     <SafeAreaView style={s.screen}>
@@ -64,16 +63,6 @@ export default function ProfileScreen() {
               <Text style={s.mono}>{value}</Text>
             </View>
           ))}
-        </View>
-
-        {/* Pod */}
-        <View style={s.card}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <Text style={s.cardTitle}>Accountability Pod</Text>
-            <TouchableOpacity><Text style={{ color: "#638688", fontSize: 13 }}>View →</Text></TouchableOpacity>
-          </View>
-          <Text style={s.cardMeta}>"DSA Grinders" · 4 members</Text>
-          <Text style={[s.cardMeta, { marginTop: 4 }]}>This week's leader: <Text style={{ color: "#f0f0f0" }}>Priya 🔥</Text></Text>
         </View>
 
         {/* Notifications */}

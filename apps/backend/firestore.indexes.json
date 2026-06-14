@@ -1,0 +1,16 @@
+{
+  "indexes": [
+    {"collectionGroup": "problems", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "nextReviewDate", "order": "ASCENDING"}]},
+    {"collectionGroup": "problems", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "pattern", "order": "ASCENDING"}, {"fieldPath": "nextReviewDate", "order": "ASCENDING"}]},
+    {"collectionGroup": "problems", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "mastered", "order": "ASCENDING"}]},
+    {"collectionGroup": "problems", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "pattern", "order": "ASCENDING"}, {"fieldPath": "mastered", "order": "ASCENDING"}]},
+    {"collectionGroup": "problems", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "difficulty", "order": "ASCENDING"}, {"fieldPath": "nextReviewDate", "order": "ASCENDING"}]},
+    {"collectionGroup": "problems", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "mastered", "order": "ASCENDING"}, {"fieldPath": "createdAt", "order": "DESCENDING"}]},
+    {"collectionGroup": "reflections", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "date", "order": "DESCENDING"}]},
+    {"collectionGroup": "reflections", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "submittedAt", "order": "DESCENDING"}]},
+    {"collectionGroup": "deadlineAdjustments", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "computedAt", "order": "DESCENDING"}]},
+    {"collectionGroup": "weeklySnapshots", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "weekStartDate", "order": "DESCENDING"}]},
+    {"collectionGroup": "solves", "queryScope": "COLLECTION_GROUP", "fields": [{"fieldPath": "matchedProblemId", "order": "ASCENDING"}, {"fieldPath": "promptedToLog", "order": "ASCENDING"}]}
+  ],
+  "fieldOverrides": []
+}
