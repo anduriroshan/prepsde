@@ -3,8 +3,19 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@prepsde/tokens": ["../../packages/tokens/src/index"],
-      "@prepsde/hooks": ["../../packages/hooks/src/index"]
+      "@prepsde/tokens": [
+        "../../packages/tokens/src/index"
+      ],
+      "@prepsde/hooks": [
+        "../../packages/hooks/src/index"
+      ]
     }
-  }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ]
 }

@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
+import { Text, Platform } from "react-native";
 
 const TAB_ICON: Record<string, string> = {
   index: "⌂",
@@ -21,6 +21,12 @@ export default function TabLayout() {
           height: 64,
           paddingBottom: 8,
           paddingTop: 8,
+          // On web, tab bar is position:fixed full-width by default — constrain it
+          ...(Platform.OS === "web" && {
+            maxWidth: 430,
+            left: "50%",
+            transform: [{ translateX: -215 }],
+          }),
         },
         tabBarActiveTintColor: "#638688",
         tabBarInactiveTintColor: "#555555",

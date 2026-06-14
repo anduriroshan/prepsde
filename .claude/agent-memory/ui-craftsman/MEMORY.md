@@ -1,1 +1,2 @@
 - [PrepSDE Design Concepts](project_prepsde_design.md) — 3 design directions (Obsidian Forge / Chalk & Iron / Signal Green) created for Flutter app
+- [Stitch × PrepSDE Integration](project_stitch_integration.md) — bento cards, burn-down chart, pace pill mockups; dark + light mode; reference in knowledge/integration_concepts.html

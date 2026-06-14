@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScrollView, View, Text, TextInput, TouchableOpacity } from "react-native";
+import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const RATINGS = [
@@ -11,100 +11,82 @@ const RATINGS = [
 ];
 
 const PAST = [
-  { date: "Jun 13", verdict: "surface",  label: "Surface",   color: "#f59e0b" },
-  { date: "Jun 12", verdict: "deepwork", label: "Deep Work", color: "#22c55e" },
-  { date: "Jun 11", verdict: "lazy",     label: "Lazy",      color: "#ef4444" },
+  { date: "Jun 13", label: "Surface",   color: "#f59e0b" },
+  { date: "Jun 12", label: "Deep Work", color: "#22c55e" },
+  { date: "Jun 11", label: "Lazy",      color: "#ef4444" },
 ];
 
 export default function ReflectScreen() {
-  const [rating, setRating] = useState<number | null>(null);
+  const [rating, setRating]       = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0d0d0d]">
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="mb-5">
-          <Text className="text-[#9a9a9a] text-[11px] font-medium tracking-widest uppercase mb-1">Reflect</Text>
-          <Text className="text-[#f0f0f0] text-[20px] font-bold">June 14, 2026</Text>
-        </View>
+    <SafeAreaView style={s.screen}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+        <Text style={s.eyebrow}>Reflect</Text>
+        <Text style={s.pageTitle}>June 14, 2026</Text>
 
         {/* Rating */}
-        <View className="bg-[#1a1a1a] border border-[rgba(255,255,255,0.06)] rounded-card p-4 mb-4">
-          <Text className="text-[#9a9a9a] text-[12px] font-medium tracking-widest uppercase mb-4">How was today?</Text>
-          <View className="flex-row justify-between">
+        <View style={s.card}>
+          <Text style={s.sectionLabel}>How was today?</Text>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 12 }}>
             {RATINGS.map((r) => (
-              <TouchableOpacity
-                key={r.value}
-                onPress={() => setRating(r.value)}
-                className="items-center gap-1"
-              >
-                <Text style={{ fontSize: rating === r.value ? 32 : 24 }}>{r.emoji}</Text>
-                <Text className="text-[10px]" style={{ color: rating === r.value ? "#638688" : "#555555" }}>
-                  {r.label}
-                </Text>
+              <TouchableOpacity key={r.value} onPress={() => setRating(r.value)} style={{ alignItems: "center", gap: 4 }}>
+                <Text style={{ fontSize: rating === r.value ? 30 : 22 }}>{r.emoji}</Text>
+                <Text style={[s.ratingLabel, rating === r.value && { color: "#638688" }]}>{r.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Input fields */}
+        {/* Inputs */}
         {[
-          { label: "What did you accomplish?", placeholder: "Problems solved, topics studied, breakthroughs..." },
-          { label: "What did you struggle with?", placeholder: "Concepts that didn't click, distractions..." },
-          { label: "Plan for tomorrow?", placeholder: "3 problems, read system design chapter..." },
-        ].map((field) => (
-          <View key={field.label} className="bg-[#1a1a1a] border border-[rgba(255,255,255,0.06)] rounded-card p-4 mb-4">
-            <Text className="text-[#9a9a9a] text-[12px] font-medium tracking-widest uppercase mb-3">
-              {field.label}
-            </Text>
+          { label: "What did you accomplish?",  placeholder: "Problems solved, topics studied..." },
+          { label: "What did you struggle with?", placeholder: "Concepts that didn't click..." },
+          { label: "Plan for tomorrow?",          placeholder: "3 problems, read system design..." },
+        ].map((f) => (
+          <View key={f.label} style={s.card}>
+            <Text style={s.sectionLabel}>{f.label}</Text>
             <TextInput
               multiline
-              numberOfLines={3}
-              placeholder={field.placeholder}
-              placeholderTextColor="#555555"
-              className="text-[#f0f0f0] text-[14px]"
-              style={{ minHeight: 72, textAlignVertical: "top" }}
+              placeholder={f.placeholder}
+              placeholderTextColor="#555"
+              style={s.textInput}
+              textAlignVertical="top"
             />
           </View>
         ))}
 
-        {/* Submit */}
-        <TouchableOpacity
-          onPress={() => setSubmitted(true)}
-          className="bg-[#638688] rounded-card py-4 items-center mb-4"
-        >
-          <Text className="text-white text-[15px] font-semibold">Submit Reflection</Text>
+        <TouchableOpacity style={s.submitBtn} onPress={() => setSubmitted(true)}>
+          <Text style={s.submitBtnText}>Submit Reflection</Text>
         </TouchableOpacity>
 
-        {/* AI Feedback (shown after submit) */}
         {submitted && (
-          <View className="bg-[#1a1a1a] border border-[rgba(99,134,136,0.2)] rounded-card p-4 mb-4">
-            <View className="flex-row items-center gap-2 mb-3">
-              <View className="bg-[rgba(34,197,94,0.12)] rounded-tight px-2 py-1">
-                <Text className="text-[#22c55e] text-[12px] font-medium">● Deep Work</Text>
+          <View style={[s.card, { borderColor: "rgba(99,134,136,0.2)" }]}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <View style={[s.badge, { backgroundColor: "rgba(34,197,94,0.12)" }]}>
+                <Text style={{ color: "#22c55e", fontSize: 12, fontWeight: "500" }}>● Deep Work</Text>
               </View>
-              <Text className="text-[#9a9a9a] text-[12px]">AI Coach Feedback</Text>
+              <Text style={s.cardMeta}>AI Coach Feedback</Text>
             </View>
-            <Text className="text-[#f0f0f0] text-[14px] leading-6">
+            <Text style={s.bodyText}>
               Nice work today, Roshan. You stayed consistent and tackled a hard problem without giving up.
-              Keep the momentum going into tomorrow — focus on DP patterns next.
+              Keep the momentum going — focus on DP patterns tomorrow.
             </Text>
           </View>
         )}
 
-        {/* Past reflections */}
-        <View className="border-t border-[rgba(255,255,255,0.04)] pt-4">
-          <Text className="text-[#9a9a9a] text-[12px] font-medium tracking-widest uppercase mb-3">Past Reflections</Text>
+        <View style={{ borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.04)", paddingTop: 16, marginTop: 4 }}>
+          <Text style={[s.sectionLabel, { marginBottom: 12 }]}>Past Reflections</Text>
           {PAST.map((p, i) => (
             <View key={i}>
-              {i > 0 && <View className="h-[1px] bg-[rgba(255,255,255,0.04)] my-2" />}
-              <TouchableOpacity className="flex-row justify-between items-center py-1">
-                <Text className="text-[#9a9a9a] text-[13px] font-mono">{p.date}</Text>
-                <View className="rounded-tight px-2 py-0.5" style={{ backgroundColor: `${p.color}20` }}>
-                  <Text className="text-[11px] font-medium" style={{ color: p.color }}>● {p.label}</Text>
+              {i > 0 && <View style={s.divider} />}
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 8 }}>
+                <Text style={s.cardMeta}>{p.date}</Text>
+                <View style={[s.badge, { backgroundColor: `${p.color}20` }]}>
+                  <Text style={{ color: p.color, fontSize: 11, fontWeight: "500" }}>● {p.label}</Text>
                 </View>
-              </TouchableOpacity>
+              </View>
             </View>
           ))}
         </View>
@@ -112,3 +94,19 @@ export default function ReflectScreen() {
     </SafeAreaView>
   );
 }
+
+const s = StyleSheet.create({
+  screen:       { flex: 1, backgroundColor: "#0d0d0d" },
+  eyebrow:      { color: "#9a9a9a", fontSize: 11, fontWeight: "500", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 },
+  pageTitle:    { color: "#f0f0f0", fontSize: 20, fontWeight: "700", marginBottom: 20 },
+  card:         { backgroundColor: "#1a1a1a", borderWidth: 1, borderColor: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 14, marginBottom: 12 },
+  sectionLabel: { color: "#9a9a9a", fontSize: 11, fontWeight: "500", letterSpacing: 1, textTransform: "uppercase" },
+  ratingLabel:  { color: "#555", fontSize: 10 },
+  textInput:    { color: "#f0f0f0", fontSize: 14, minHeight: 72, marginTop: 10 },
+  submitBtn:    { backgroundColor: "#638688", borderRadius: 8, paddingVertical: 14, alignItems: "center", marginBottom: 12 },
+  submitBtnText:{ color: "#fff", fontSize: 15, fontWeight: "600" },
+  badge:        { borderRadius: 4, paddingHorizontal: 8, paddingVertical: 4 },
+  cardMeta:     { color: "#9a9a9a", fontSize: 12 },
+  bodyText:     { color: "#f0f0f0", fontSize: 14, lineHeight: 22 },
+  divider:      { height: 1, backgroundColor: "rgba(255,255,255,0.04)" },
+});

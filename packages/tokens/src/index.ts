@@ -1,7 +1,3 @@
-export * as colors from "./colors";
-export * as typography from "./typography";
-export * as spacing from "./spacing";
-
 export { accent, dark, light, semantic, difficulty, verdict } from "./colors";
 export { fontFamily, fontSize } from "./typography";
 export { spacing, borderRadius } from "./spacing";
